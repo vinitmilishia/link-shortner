@@ -9,7 +9,7 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
     "custom-#{SecureRandom.hex(2)}"
   end
 
-  test "Iteration 1 - should create a shortened URL" do
+  test "Feature 1 - should create a shortened URL" do
     # force our slug generator to generate something deterministic
     SlugGenerator.implementation = -> { "abc123" }
 
@@ -24,7 +24,7 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
     assert_redirected_to long_url
   end
 
-  test "Iteration 2 - posting the same url multiple times should return the same slug" do
+  test "Feature 2 - posting the same url multiple times should return the same slug" do
     # force our slug generator to generate something deterministic
     generated_slugs = [ "one", "two" ]
     SlugGenerator.implementation = -> { generated_slugs.shift or fail "ran out of slugs" }
@@ -48,7 +48,7 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "Iteration 3 - users are allowed to define their own custom slug if it's available" do
+  test "Feature 3 - users are allowed to define their own custom slug if it's available" do
     # we are not expecting the SlugGenerator to be called at all
     SlugGenerator.implementation = -> { fail "slugs should not be generated" }
 
