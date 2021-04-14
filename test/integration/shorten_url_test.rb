@@ -5,6 +5,10 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
     "https://my.verylong.url/#{SecureRandom.hex(16)}"
   end
 
+  def random_slug
+    "custom-#{SecureRandom.hex(2)}"
+  end
+
   test "Iteration 1 - should create a shortened URL" do
     # force our slug generator to generate something deterministic
     SlugGenerator.implementation = -> { "abc123" }
@@ -42,5 +46,26 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
     # the second url should not be used however
     get "/two"
     assert_response :not_found
+  end
+
+  test "Iteration 3 - users are allowed to define their own custom slug if it's available" do
+    # we are not expecting the SlugGenerator to be called at all
+    SlugGenerator.implementation = -> { fail "slugs should not be generated" }
+
+    long_url = random_long_url()
+    slug = random_slug()
+
+    # create a shortened url, the first attempt should succeed
+    post "/api/links", params: { url: long_url, slug: slug }
+    assert_response :ok
+
+    # we should be able to be redirected to the long url
+    get "/#{slug}"
+    assert_redirected_to long_url
+
+    # if we try to request a slug that has already been taken we should receive
+    # an HTTP 409 (Conflict)
+    post "/api/links", params: { url: long_url, slug: slug }
+    assert_response :conflict
   end
 end
