@@ -57,7 +57,7 @@ class ShortenUrlTest < ActionDispatch::IntegrationTest
 
     # create a shortened url, the first attempt should succeed
     post "/api/links", params: { url: long_url, slug: slug }
-    assert_response :ok
+    assert_response :created
 
     # we should be able to be redirected to the long url
     get "/#{slug}"
